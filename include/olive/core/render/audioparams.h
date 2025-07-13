@@ -55,7 +55,16 @@ public:
     // Cache channel count
     calculate_channel_count();
   }
-
+  AudioParams(const int& sample_rate, uint64_t channel_layout, const SampleFormat& format) :
+     sample_rate_(sample_rate),
+     format_(format)
+  {
+    set_default_footage_parameters();
+    timebase_ = sample_rate_as_time_base();
+    av_channel_layout_from_mask(&channel_layout_, channel_layout);
+    // Cache channel count
+    calculate_channel_count();
+  }
   int sample_rate() const
   {
     return sample_rate_;
@@ -76,7 +85,11 @@ public:
     channel_layout_ = channel_layout;
     calculate_channel_count();
   }
-
+  void set_channel_layout(uint64_t mask)
+  {
+    av_channel_layout_from_mask(&channel_layout_, mask);
+    calculate_channel_count();
+  }
   rational time_base() const
   {
     return timebase_;

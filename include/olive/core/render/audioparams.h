@@ -20,6 +20,7 @@
 
 #ifndef LIBOLIVECORE_AUDIOPARAMS_H
 #define LIBOLIVECORE_AUDIOPARAMS_H
+#include <cstring>
 
 extern "C" {
 #include <libavutil/channel_layout.h>
@@ -42,6 +43,8 @@ public:
     set_default_footage_parameters();
     // Cache channel count
     calculate_channel_count();
+    memset(&channel_layout_, 0, sizeof(AVChannelLayout));
+    channel_count_=0;
   }
 
   AudioParams(const int& sample_rate, const AVChannelLayout& channel_layout, const SampleFormat& format) :

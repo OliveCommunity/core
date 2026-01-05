@@ -21,7 +21,6 @@
 
 #include "util/stringutils.h"
 
-#include <cstring>
 #include <stdarg.h>
 #include <stdexcept>
 

@@ -39,23 +39,24 @@ class AudioParams {
 public:
 	AudioParams()
 		: sample_rate_(0)
+		, channel_layout_{}
+		, channel_count_(0)
 		, format_(SampleFormat::INVALID)
 	{
 		set_default_footage_parameters();
-		// Cache channel count
-		calculate_channel_count();
-		memset(&channel_layout_, 0, sizeof(AVChannelLayout));
-		channel_count_ = 0;
 	}
 
 	AudioParams(const int &sample_rate, const AVChannelLayout &channel_layout,
 				const SampleFormat &format)
 		: sample_rate_(sample_rate)
-		, channel_layout_(channel_layout)
+		, channel_layout_{}
+		, channel_count_(0)
 		, format_(format)
 	{
 		set_default_footage_parameters();
 		timebase_ = sample_rate_as_time_base();
+		av_channel_layout_uninit(&channel_layout_);
+		av_channel_layout_copy(&channel_layout_, &channel_layout);
 
 		// Cache channel count
 		calculate_channel_count();
@@ -63,10 +64,13 @@ public:
 	AudioParams(const int &sample_rate, uint64_t channel_layout,
 				const SampleFormat &format)
 		: sample_rate_(sample_rate)
+		, channel_layout_{}
+		, channel_count_(0)
 		, format_(format)
 	{
 		set_default_footage_parameters();
 		timebase_ = sample_rate_as_time_base();
+		av_channel_layout_uninit(&channel_layout_);
 		av_channel_layout_from_mask(&channel_layout_, channel_layout);
 		// Cache channel count
 		calculate_channel_count();
@@ -81,18 +85,20 @@ public:
 		sample_rate_ = sample_rate;
 	}
 
-	AVChannelLayout channel_layout() const
+	const AVChannelLayout &channel_layout() const
 	{
 		return channel_layout_;
 	}
 
-	void set_channel_layout(AVChannelLayout &channel_layout)
+	void set_channel_layout(const AVChannelLayout &channel_layout)
 	{
-		channel_layout_ = channel_layout;
+		av_channel_layout_uninit(&channel_layout_);
+		av_channel_layout_copy(&channel_layout_, &channel_layout);
 		calculate_channel_count();
 	}
 	void set_channel_layout(uint64_t mask)
 	{
+		av_channel_layout_uninit(&channel_layout_);
 		av_channel_layout_from_mask(&channel_layout_, mask);
 		calculate_channel_count();
 	}

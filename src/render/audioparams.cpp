@@ -45,10 +45,10 @@ const std::vector<uint64_t> AudioParams::kSupportedChannelLayouts = {
 
 bool AudioParams::operator==(const AudioParams &other) const
 {
-	AVChannelLayout otherLayout = other.channel_layout();
 	return format() == other.format() && sample_rate() == other.sample_rate() &&
 		   time_base() == other.time_base() &&
-		   av_channel_layout_compare(&channel_layout_, &otherLayout);
+		   av_channel_layout_compare(&channel_layout_,
+									 &other.channel_layout()) == 0;
 }
 
 bool AudioParams::operator!=(const AudioParams &other) const

@@ -56,6 +56,7 @@ add_library(olivecore
 target_include_directories(olivecore PRIVATE
   ${FFMPEG_INCLUDE_DIRS}
   "${CMAKE_CURRENT_SOURCE_DIR}/include/olive/core"
+  "${CMAKE_CURRENT_SOURCE_DIR}/../../third_party/openfx/include/"
 )
 
 target_link_libraries(olivecore PRIVATE

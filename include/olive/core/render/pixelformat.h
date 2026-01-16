@@ -20,7 +20,8 @@
 
 #ifndef LIBOLIVECORE_PIXELFORMAT_H
 #define LIBOLIVECORE_PIXELFORMAT_H
-
+#include "ofxCore.h"
+#include <string>
 namespace olive::core
 {
 
@@ -38,6 +39,21 @@ public:
 		return f_;
 	}
 
+	static PixelFormat from_ofx(std::string ofxFormat){
+		if(ofxFormat == kOfxBitDepthByte){
+			return PixelFormat::U8;
+		}
+		else if (ofxFormat == kOfxBitDepthShort){
+			return PixelFormat::U16;
+		}
+		else if(ofxFormat == kOfxBitDepthHalf){
+			return PixelFormat::F16;
+		}
+		else if(ofxFormat == kOfxBitDepthFloat){
+			return PixelFormat::F32;
+		}
+		return PixelFormat::INVALID;
+	}
 	static int byte_count(Format f)
 	{
 		switch (f) {

@@ -28,7 +28,7 @@ namespace olive::core
 
 class PixelFormat {
 public:
-	enum Format { INVALID = -1, U8, U16, F16, F32, COUNT };
+	enum Format { INVALID = -1, U8, U10, U16, F16, F32, COUNT };
 
 	PixelFormat(Format f = INVALID)
 	{
@@ -63,6 +63,8 @@ public:
 			break;
 		case U8:
 			return 1;
+		case U10:
+			return 4; // packed RGBA10A2, treated as 4 bytes per pixel
 		case U16:
 		case F16:
 			return 2;
@@ -78,6 +80,8 @@ public:
 		switch (f_) {
 		case U8:
 			return "u8";
+		case U10:
+			return "u10";
 		case U16:
 			return "u16";
 		case F16:
@@ -103,6 +107,7 @@ public:
 		case INVALID:
 		case COUNT:
 		case U8:
+		case U10:
 		case U16:
 			break;
 		case F16:

@@ -21,6 +21,7 @@
 
 #include "util/color.h"
 
+#include <algorithm>
 #include <cmath>
 #include <Imath/half.h>
 #include <math.h>
@@ -182,6 +183,15 @@ void Color::toData(char *out, const PixelFormat &format,
 {
 	unsigned int count = std::min(RGBA, nb_channels);
 
+	if (format == PixelFormat::U10 && count == 4) {
+		const uint32_t r = static_cast<uint32_t>(std::clamp(data_[0], DataType(0.0), DataType(1.0)) * 1023.0 + 0.5);
+		const uint32_t g = static_cast<uint32_t>(std::clamp(data_[1], DataType(0.0), DataType(1.0)) * 1023.0 + 0.5);
+		const uint32_t b = static_cast<uint32_t>(std::clamp(data_[2], DataType(0.0), DataType(1.0)) * 1023.0 + 0.5);
+		const uint32_t a = static_cast<uint32_t>(std::clamp(data_[3], DataType(0.0), DataType(1.0)) * 3.0 + 0.5);
+		reinterpret_cast<uint32_t *>(out)[0] = r | (g << 10) | (b << 20) | (a << 30);
+		return;
+	}
+
 	for (unsigned int i = 0; i < count; i++) {
 		DataType f = data_[i];
 
@@ -191,6 +201,9 @@ void Color::toData(char *out, const PixelFormat &format,
 			break;
 		case PixelFormat::U8:
 			reinterpret_cast<uint8_t *>(out)[i] = f * 255.0;
+			break;
+		case PixelFormat::U10:
+			// handled above
 			break;
 		case PixelFormat::U16:
 			reinterpret_cast<uint16_t *>(out)[i] = f * 65535.0;
@@ -212,6 +225,15 @@ Color Color::fromData(const char *in, const PixelFormat &format,
 
 	unsigned int count = std::min(RGBA, nb_channels);
 
+	if (format == PixelFormat::U10 && count == 4) {
+		const uint32_t word = reinterpret_cast<const uint32_t *>(in)[0];
+		c.data_[0] = DataType((word & 0x3ff) / 1023.0);
+		c.data_[1] = DataType(((word >> 10) & 0x3ff) / 1023.0);
+		c.data_[2] = DataType(((word >> 20) & 0x3ff) / 1023.0);
+		c.data_[3] = DataType(((word >> 30) & 0x3) / 3.0);
+		return c;
+	}
+
 	for (unsigned int i = 0; i < count; i++) {
 		DataType &f = c.data_[i];
 
@@ -221,6 +243,9 @@ Color Color::fromData(const char *in, const PixelFormat &format,
 			break;
 		case PixelFormat::U8:
 			f = DataType(reinterpret_cast<const uint8_t *>(in)[i]) / 255.0;
+			break;
+		case PixelFormat::U10:
+			// handled above
 			break;
 		case PixelFormat::U16:
 			f = DataType(reinterpret_cast<const uint16_t *>(in)[i]) / 65535.0;
